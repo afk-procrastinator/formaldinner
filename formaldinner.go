@@ -21,8 +21,9 @@ import (
 type Person struct {
 	Lastname  string
 	Firstname string
-	Table     string
+	Table     [3]string
 	Table2    string
+	Table3    string
 }
 
 // Main function:
@@ -46,7 +47,7 @@ func main() {
 	var peopleSlice []Person = people
 	var slicedPeople = Shuffle(peopleSlice)
 	initFile("first.csv")
-	iterateAndChoose(slicedPeople, "first.csv")
+	iterateAndChoose(slicedPeople, "first.csv", 2)
 	csvFile, _ = os.Open("first.csv")
 	csvFile.Close()
 	people = nil
@@ -60,16 +61,19 @@ func main() {
 		} else if error != nil {
 			log.Fatal(error)
 		}
+
+		tab := [line[2]]
+
 		people = append(people, Person{
 			Firstname: line[0],
 			Lastname:  line[1],
-			Table:     line[2],
+			Table:     tab,
 		})
 	}
 	peopleSlice = people
 	slicedPeople = Shuffle(peopleSlice)
 	initFile("second.csv")
-	iterateAndChoose(slicedPeople, "second.csv")
+	iterateAndChoose(slicedPeople, "second.csv", 1)
 	csvFile, _ = os.Open("second.csv")
 	csvFile.Close()
 	people = nil
@@ -86,8 +90,6 @@ func main() {
 		people = append(people, Person{
 			Firstname: line[0],
 			Lastname:  line[1],
-			Table:     line[2],
-			Table2:    line[3],
 		})
 	}
 	peopleSlice = people
@@ -95,7 +97,7 @@ func main() {
 	initFile("third.csv")
 	fmt.Println(slicedPeople)
 
-	iterateAndChoose(slicedPeople, "third.csv")
+	iterateAndChoose(slicedPeople, "third.csv", 2)
 	csvFile, _ = os.Open("third.csv")
 	csvFile.Close()
 }
@@ -136,7 +138,7 @@ func removeIndex(num int, slice []Person) []Person {
 2 = KC
 3 = waiter
 */
-func makeFile(slice []Person, num int, seatType int, title string) {
+func makeFile(slice []Person, num int, seatType int, title string, iteration int) {
 
 	var name string
 
@@ -145,14 +147,14 @@ func makeFile(slice []Person, num int, seatType int, title string) {
 
 	for _, v := range d {
 		if seatType == 3 {
-			v.Table = "Waiter"
-			name = v.Lastname + "," + v.Firstname + "," + v.Table + "," + v.Table2
+			v.Table[iteration] = "Waiter"
+			name = v.Lastname + "," + v.Firstname + "," + v.Table[iteration]
 		} else if seatType == 2 {
-			v.Table = "KC"
-			name = v.Lastname + "," + v.Firstname + "," + v.Table + "," + v.Table2
+			v.Table[iteration] = "KC"
+			name = v.Lastname + "," + v.Firstname + "," + v.Table[iteration]
 		} else {
-			v.Table = strconv.Itoa(num)
-			name = v.Lastname + "," + v.Firstname + "," + v.Table + "," + v.Table2
+			v.Table[iteration] = strconv.Itoa(num)
+			name = v.Lastname + "," + v.Firstname + "," + v.Table[iteration]
 		}
 
 		fmt.Fprintln(f, name)
@@ -192,13 +194,13 @@ func rearrange(remove int, place int, input []Person) []Person {
 
 // Function that iterates through the slice and chooses people to go to certain positions based on index.
 // Also calls in the file creation function.
-func iterateAndChoose(slicedPeople []Person, title string) []Person {
+func iterateAndChoose(slicedPeople []Person, title string, iteration int) []Person {
 	var originalGroup = slicedPeople
 
 	// choose the first 10 to be kitchen crew:
 	var nextGroup = chooseNext(slicedPeople, 10)
 
-	makeFile(nextGroup, 10, 2, title)
+	makeFile(nextGroup, 10, 2, title, iteration)
 
 	// remove the first 10 from the main list:
 	removeIndex(10, slicedPeople)
@@ -206,7 +208,7 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	// choose the next 31 to be waiters:
 	nextGroup = chooseNext(slicedPeople, 32)
 
-	makeFile(nextGroup, 32, 3, title)
+	makeFile(nextGroup, 32, 3, title, iteration)
 
 	// remove the next 31 from the main list:
 	removeIndex(32, slicedPeople)
@@ -214,7 +216,7 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	// append all tables to CSV file:
 	for i := 1; i < 32; i++ {
 		var table = chooseNext(slicedPeople, 8)
-		makeFile(table, i, 1, title)
+		makeFile(table, i, 1, title, iteration)
 		removeIndex(8, slicedPeople)
 	}
 	fmt.Println("all completed succesfully!")
