@@ -28,6 +28,14 @@ type Person struct {
 
 // Main function:
 func main() {
+
+	// 32 people:
+	var waiter []Person
+	// 10 people:
+	var kitchen []Person
+	// 8 people per, 31 total, 249 in all:
+	var table [][]Person
+
 	// Reading and parsing the original CSV file:
 	csvFile, _ := os.Open("seating.csv")
 	reader := csv.NewReader(bufio.NewReader(csvFile))
@@ -48,6 +56,7 @@ func main() {
 	var slicedPeople = Shuffle(peopleSlice)
 	initFile("first.csv")
 	iterateAndChoose(slicedPeople, "first.csv", 1)
+
 	csvFile, _ = os.Open("first.csv")
 	csvFile.Close()
 	people = nil
@@ -71,6 +80,7 @@ func main() {
 	slicedPeople = Shuffle(peopleSlice)
 	initFile("second.csv")
 	iterateAndChoose(slicedPeople, "second.csv", 2)
+
 	csvFile, _ = os.Open("second.csv")
 	csvFile.Close()
 	people = nil
@@ -93,10 +103,8 @@ func main() {
 	peopleSlice = people
 	slicedPeople = Shuffle(peopleSlice)
 	initFile("third.csv")
-	fmt.Println(slicedPeople)
 	iterateAndChoose(slicedPeople, "third.csv", 3)
-	csvFile, _ = os.Open("third.csv")
-	csvFile.Close()
+
 }
 
 // Shuffle function taken from https://www.calhoun.io/how-to-shuffle-arrays-and-slices-in-go/
