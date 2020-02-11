@@ -19,6 +19,7 @@ import (
 
 // Person struct declaration:
 type Person struct {
+	Placement string
 	Lastname  string
 	Firstname string
 	Table     string
@@ -29,17 +30,28 @@ type Person struct {
 // Main function:
 func main() {
 
-	// 32 people:
-	var waiter []Person
-	// 10 people:
-	var kitchen []Person
-	// 8 people per, 31 total, 249 in all:
-	var table [][]Person
+	// // 32 people:
+	// var waiter []Person
+	// // 10 people:
+	// var kitchen []Person
+	// // 8 people per, 31 total, 249 in all:
+	// var table [][]Person
 
 	// Reading and parsing the original CSV file:
-	csvFile, _ := os.Open("seating.csv")
-	reader := csv.NewReader(bufio.NewReader(csvFile))
+
+	runBody("seating.csv", "first.csv", 1)
+	runBody("first.csv", "second.csv", 2)
+	runBody("second.csv", "third.csv", 3)
+
+}
+
+func runBody(firstFile string, secondFile string, iteration int) {
 	var people []Person
+	var csvFile, _ = os.Open(firstFile)
+	csvFile.Close()
+	people = nil
+	csvFile, _ = os.Open(firstFile)
+	var reader = csv.NewReader(bufio.NewReader(csvFile))
 	for {
 		line, error := reader.Read()
 		if error == io.EOF {
@@ -47,64 +59,18 @@ func main() {
 		} else if error != nil {
 			log.Fatal(error)
 		}
+
 		people = append(people, Person{
-			Firstname: line[0],
-			Lastname:  line[1],
+			Placement: line[0],
+			Firstname: line[1],
+			Lastname:  line[2],
 		})
 	}
-	var peopleSlice []Person = people
+	var peopleSlice = people
 	var slicedPeople = Shuffle(peopleSlice)
-	initFile("first.csv")
-	iterateAndChoose(slicedPeople, "first.csv", 1)
-
-	csvFile, _ = os.Open("first.csv")
-	csvFile.Close()
-	people = nil
-	csvFile, _ = os.Open("first.csv")
-	reader = csv.NewReader(bufio.NewReader(csvFile))
-	for {
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-		} else if error != nil {
-			log.Fatal(error)
-		}
-
-		people = append(people, Person{
-			Firstname: line[0],
-			Lastname:  line[1],
-			Table:     line[2],
-		})
-	}
-	peopleSlice = people
-	slicedPeople = Shuffle(peopleSlice)
-	initFile("second.csv")
-	iterateAndChoose(slicedPeople, "second.csv", 2)
-
-	csvFile, _ = os.Open("second.csv")
-	csvFile.Close()
-	people = nil
-	csvFile, _ = os.Open("second.csv")
-	reader = csv.NewReader(bufio.NewReader(csvFile))
-	for {
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-		} else if error != nil {
-			log.Fatal(error)
-		}
-		people = append(people, Person{
-			Firstname: line[0],
-			Lastname:  line[1],
-			Table:     line[2],
-			Table2:    line[3],
-		})
-	}
-	peopleSlice = people
-	slicedPeople = Shuffle(peopleSlice)
-	initFile("third.csv")
-	iterateAndChoose(slicedPeople, "third.csv", 3)
-
+	initFile(secondFile)
+	iterateAndChoose(slicedPeople, secondFile, iteration)
+	cleanUp(slicedPeople)
 }
 
 // Shuffle function taken from https://www.calhoun.io/how-to-shuffle-arrays-and-slices-in-go/
@@ -153,13 +119,13 @@ func makeFile(slice []Person, num int, seatType int, title string, iteration int
 	for _, v := range d {
 		if seatType == 3 {
 			v.Table = "Waiter"
-			name = v.Lastname + "," + v.Firstname
+			name = v.Placement + "," + v.Lastname + "," + v.Firstname
 		} else if seatType == 2 {
 			v.Table = "KC"
-			name = v.Lastname + "," + v.Firstname
+			name = v.Placement + "," + v.Lastname + "," + v.Firstname
 		} else {
 			v.Table = strconv.Itoa(num)
-			name = v.Lastname + "," + v.Firstname
+			name = v.Placement + "," + v.Lastname + "," + v.Firstname
 		}
 
 		fmt.Fprintln(f, name+","+v.Table+","+v.Table2)
@@ -225,4 +191,29 @@ func iterateAndChoose(slicedPeople []Person, title string, iteration int) []Pers
 	fmt.Println("all completed succesfully!")
 
 	return originalGroup
+}
+
+//	fmt.Println(peopleSlice[0].Placement)
+
+// rearrange()
+
+// Function to "clean-up" the final file. Places all in numberic/alphabetical order. Will add in an ability to re-pars the files to combine them all together.
+func cleanUp(slice []Person) []Person {
+	initFile("final.csv")
+	var secSlice []Person
+	d := slice
+
+	//fmt.Println(secSlice)
+
+	for i, v := range d {
+		var (
+			toGo, kind = strconv.Atoi(v.Placement)
+		)
+		if kind != nil {
+			fmt.Println(kind)
+		}
+		secSlice = append(rearrange(int(i), toGo, d))
+	}
+	fmt.Println(secSlice)
+	return secSlice
 }
