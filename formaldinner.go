@@ -39,12 +39,92 @@ func main() {
 
 	// Reading and parsing the original CSV file:
 
-	runBody("seating.csv", "first.csv", 1)
-	runBody("first.csv", "second.csv", 2)
-	runBody("second.csv", "third.csv", 3)
+	// runBody("seating.csv", "first.csv", 1)
+	// runBody("first.csv", "second.csv", 2)
+	// runBody("second.csv", "third.csv", 3)
+
+	var people []Person
+	var csvFile, _ = os.Open("seating.csv")
+	csvFile.Close()
+	people = nil
+	csvFile, _ = os.Open("seating.csv")
+	var reader = csv.NewReader(bufio.NewReader(csvFile))
+	for {
+		line, error := reader.Read()
+		if error == io.EOF {
+			break
+		} else if error != nil {
+			log.Fatal(error)
+		}
+
+		people = append(people, Person{
+			Placement: line[0],
+			Firstname: line[1],
+			Lastname:  line[2],
+			//Table:     line[3],
+		})
+	}
+	var peopleSlice = people
+	var slicedPeople = Shuffle(peopleSlice)
+	initFile("first.csv")
+	iterateAndChoose(slicedPeople, "first.csv", 1)
+
+	csvFile, _ = os.Open("first.csv")
+	csvFile.Close()
+	people = nil
+	csvFile, _ = os.Open("first.csv")
+	reader = csv.NewReader(bufio.NewReader(csvFile))
+	for {
+		line, error := reader.Read()
+		if error == io.EOF {
+			break
+		} else if error != nil {
+			log.Fatal(error)
+		}
+
+		people = append(people, Person{
+			Placement: line[0],
+			Firstname: line[1],
+			Lastname:  line[2],
+			// Table:     line[3],
+			// Table2:    line[4],
+		})
+	}
+	peopleSlice = people
+	slicedPeople = Shuffle(peopleSlice)
+	initFile("second.csv")
+	iterateAndChoose(slicedPeople, "second.csv", 2)
+
+	csvFile, _ = os.Open("second.csv")
+	csvFile.Close()
+	people = nil
+	csvFile, _ = os.Open("second.csv")
+	reader = csv.NewReader(bufio.NewReader(csvFile))
+	for {
+		line, error := reader.Read()
+		if error == io.EOF {
+			break
+		} else if error != nil {
+			log.Fatal(error)
+		}
+
+		people = append(people, Person{
+			Placement: line[0],
+			Firstname: line[1],
+			Lastname:  line[2],
+			// Table:     line[3],
+			// Table2:    line[5],
+			// Table3:    line[6],
+		})
+	}
+	peopleSlice = people
+	slicedPeople = Shuffle(peopleSlice)
+	initFile("third.csv")
+	iterateAndChoose(slicedPeople, "third.csv", 3)
 
 }
 
+// Function to read the previous file, create the second, and do the iteration thingamajig.
 func runBody(firstFile string, secondFile string, iteration int) {
 	var people []Person
 	var csvFile, _ = os.Open(firstFile)
@@ -70,7 +150,66 @@ func runBody(firstFile string, secondFile string, iteration int) {
 	var slicedPeople = Shuffle(peopleSlice)
 	initFile(secondFile)
 	iterateAndChoose(slicedPeople, secondFile, iteration)
-	cleanUp(slicedPeople)
+
+	csvFile, _ = os.Open(secondFile)
+	csvFile.Close()
+	people = nil
+	csvFile, _ = os.Open(secondFile)
+	reader = csv.NewReader(bufio.NewReader(csvFile))
+	for {
+		line, error := reader.Read()
+		if error == io.EOF {
+			break
+		} else if error != nil {
+			log.Fatal(error)
+		}
+
+		people = append(people, Person{
+			Placement: line[0],
+			Firstname: line[1],
+			Lastname:  line[2],
+		})
+	}
+	peopleSlice = people
+
+	cleanUp(peopleSlice)
+
+	fmt.Println(peopleSlice)
+
+}
+
+// Function to "clean-up" the final file. Places all in numberic/alphabetical order. Will add in an ability to re-pars the files to combine them all together.
+func cleanUp(slice []Person) []Person {
+	initFile("final.csv")
+	var secSlice []Person
+	d := slice
+	fmt.Println(d)
+
+	for i, v := range d {
+		var (
+			toGo, kind = strconv.Atoi(v.Placement)
+		)
+		if kind != nil {
+			fmt.Println(kind)
+		}
+		fmt.Println(v)
+		secSlice = append(rearrange(int(i), toGo, d))
+	}
+	fmt.Println(secSlice)
+	return secSlice
+}
+
+// Function to move a slice item:
+func rearrange(remove int, place int, input []Person) []Person {
+	slice := input
+	val := slice[remove]
+	slice = append(slice[:remove], slice[remove+1:]...)
+	newSlice := make([]Person, place+1)
+	copy(newSlice, slice[:place])
+	newSlice[place] = val
+	slice = append(newSlice, slice[place:]...)
+	fmt.Println("SLICE:", slice)
+	return slice
 }
 
 // Shuffle function taken from https://www.calhoun.io/how-to-shuffle-arrays-and-slices-in-go/
@@ -97,6 +236,9 @@ func chooseNext(slice []Person, num int) []Person {
 
 // Chooses the next int people, removes them from the main slice:
 func removeIndex(num int, slice []Person) []Person {
+
+	//returnrearrange(num, 1, slice)
+
 	for i := 0; i < num; i++ {
 		slice = append(slice[:0], slice[0+1:]...)
 	}
@@ -151,18 +293,6 @@ func initFile(title string) {
 	}
 }
 
-// Function to move a slice item:
-func rearrange(remove int, place int, input []Person) []Person {
-	slice := input
-	val := slice[remove]
-	slice = append(slice[:remove], slice[remove+1:]...)
-	newSlice := make([]Person, place+1)
-	copy(newSlice, slice[:place])
-	newSlice[place] = val
-	slice = append(newSlice, slice[place:]...)
-	return slice
-}
-
 // Function that iterates through the slice and chooses people to go to certain positions based on index.
 // Also calls in the file creation function.
 func iterateAndChoose(slicedPeople []Person, title string, iteration int) []Person {
@@ -191,29 +321,4 @@ func iterateAndChoose(slicedPeople []Person, title string, iteration int) []Pers
 	fmt.Println("all completed succesfully!")
 
 	return originalGroup
-}
-
-//	fmt.Println(peopleSlice[0].Placement)
-
-// rearrange()
-
-// Function to "clean-up" the final file. Places all in numberic/alphabetical order. Will add in an ability to re-pars the files to combine them all together.
-func cleanUp(slice []Person) []Person {
-	initFile("final.csv")
-	var secSlice []Person
-	d := slice
-
-	//fmt.Println(secSlice)
-
-	for i, v := range d {
-		var (
-			toGo, kind = strconv.Atoi(v.Placement)
-		)
-		if kind != nil {
-			fmt.Println(kind)
-		}
-		secSlice = append(rearrange(int(i), toGo, d))
-	}
-	fmt.Println(secSlice)
-	return secSlice
 }
