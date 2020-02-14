@@ -75,7 +75,7 @@ func rearrange(remove int, place int, input []Person) []Person {
 	copy(newSlice, slice[:place])
 	newSlice[place] = val
 	slice = append(newSlice, slice[place:]...)
-	fmt.Println("SLICE:", slice)
+	//fmt.Println("SLICE:", slice)
 	return slice
 }
 
@@ -118,9 +118,13 @@ func removeIndex(num int, slice []Person) []Person {
 2 = KC
 3 = waiter
 */
-func makeFile(slice []Person, num int, seatType int, title string) []Person {
+func makeFile(slice []Person, num int, seatType int, title string) string {
 
 	var name string
+	var kitchenCrew []string
+	var tables [][]string
+	var addOn []string
+	var nameHold string
 
 	f, err := os.OpenFile(title, os.O_APPEND|os.O_WRONLY, 0644)
 	d := slice
@@ -129,42 +133,42 @@ func makeFile(slice []Person, num int, seatType int, title string) []Person {
 		if seatType == 3 {
 			v.Table = "Waiter"
 			name = v.Lastname + "," + v.Firstname
-
-			for i := 0; i < 10; i++ {
-				return append(waiter, v)
-			}
+			return name
 		} else if seatType == 2 {
 			v.Table = "KC"
 			name = v.Lastname + "," + v.Firstname
+			kitchenCrew = append(kitchenCrew, name)
 
-			for i := 0; i < 10; i++ {
-				return append(kitchen, v)
-			}
 		} else {
 			v.Table = strconv.Itoa(num)
 			name = v.Lastname + "," + v.Firstname
-			//return append(table, v)
-
+			nameHold = name + "," + v.Table
+			addOn = append(addOn, nameHold)
 		}
 		fmt.Fprintln(f, name+","+v.Table)
+		tables = append(tables, addOn)
+
+		//fmt.Println(tables, waiter, kitchenCrew)
 		if err != nil {
 			fmt.Println(err)
-			return nil
+			return ""
 		}
 	}
+	fmt.Println("here")
+
 	err = f.Close()
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return ""
 	}
-	return nil
+	return ""
 }
 
 // Primary init of the file:
 func initFile(title string) {
 	f, err := os.Create(title)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		f.Close()
 		return
 	}
@@ -176,10 +180,13 @@ func initFile(title string) {
 // title is the string of the txt file
 func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	var originalGroup = slicedPeople
+	var waiter []string
 
 	// choose the first 10 to be kitchen crew:
 	var nextGroup = chooseNext(slicedPeople, 10)
-	fmt.Println("makefile: ", makeFile(nextGroup, 10, 2, title))
+	kcReturn := makeFile(nextGroup, 10, 2, title)
+	waiter = append(waiter, kcReturn)
+	fmt.Println("return:", waiter)
 
 	// remove the first 10 from the main list:
 	removeIndex(10, slicedPeople)
