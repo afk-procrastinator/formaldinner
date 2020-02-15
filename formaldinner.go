@@ -41,6 +41,8 @@ var value int = 1
 
 var tableNum int = 1
 
+var counter = -1
+
 // Main function:
 func main() {
 
@@ -113,33 +115,32 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 
 	var name string
 
-	counter := -1
 	f, err := os.OpenFile(title, os.O_APPEND|os.O_WRONLY, 0644)
 	d := slice
 
+	// Loops through entirety of my slice
 	for _, v := range d {
 
 		valueStr := strconv.Itoa(value)
 
+		// If you're above position (value) 280, you're KC
 		switch {
 		case value > 280:
-			valueStr = valueStr + " kc"
+			valueStr = "Kitchen Crew"
 		default:
-
+			// Counter cycles from 0 to 7, picking out 8 people per table
 			counter++
-			if counter > 7 {
+			if counter == 8 {
 				tableNum++
 				counter = 0
-				fmt.Println("counted to ", tableNum)
 			}
 
 			valueStr = strconv.Itoa(tableNum)
 
 		}
 
-		name = v.Lastname + "," + v.Firstname + "," + valueStr + "," + strconv.Itoa(counter)
-
-		//fmt.Println("value", name)
+		// Full name to print to the csv file. Will be changed for final iterations, currently prints basically everything for clarity's sake.
+		name = v.Lastname + "," + v.Firstname + "," + valueStr + "; Position " + strconv.Itoa(counter)
 
 		fmt.Fprintln(f, name)
 
@@ -232,7 +233,6 @@ func newPlacement(location int) {
 		fmt.Println("number 1")
 	}
 }
-
 func rearrange(remove int, place int, input []Person) []Person {
 	slice := input
 	val := slice[remove]
