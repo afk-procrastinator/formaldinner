@@ -19,6 +19,7 @@ import (
 
 // Person struct declaration:
 type Person struct {
+	Value     string
 	Placement string
 	Lastname  string
 	Firstname string
@@ -35,6 +36,10 @@ var kitchen []Person
 
 // 8 people per, 31 total, 249 in all:
 var table [][]Person
+
+var value int = 1
+
+var tableNum int = 1
 
 // Main function:
 func main() {
@@ -63,20 +68,6 @@ func main() {
 	initFile("first.csv")
 	iterateAndChoose(slicedPeople, "first.csv")
 
-}
-
-// OUTDATED FUNCTIONS:
-// Function to move a slice item:
-func rearrange(remove int, place int, input []Person) []Person {
-	slice := input
-	val := slice[remove]
-	slice = append(slice[:remove], slice[remove+1:]...)
-	newSlice := make([]Person, place+1)
-	copy(newSlice, slice[:place])
-	newSlice[place] = val
-	slice = append(newSlice, slice[place:]...)
-	//fmt.Println("SLICE:", slice)
-	return slice
 }
 
 // Shuffle function taken from https://www.calhoun.io/how-to-shuffle-arrays-and-slices-in-go/
@@ -121,40 +112,44 @@ func removeIndex(num int, slice []Person) []Person {
 func makeFile(slice []Person, num int, seatType int, title string) string {
 
 	var name string
-	var kitchenCrew []string
-	var tables [][]string
-	var addOn []string
-	var nameHold string
 
+	counter := -1
 	f, err := os.OpenFile(title, os.O_APPEND|os.O_WRONLY, 0644)
 	d := slice
 
 	for _, v := range d {
-		if seatType == 3 {
-			v.Table = "Waiter"
-			name = v.Lastname + "," + v.Firstname
-			return name
-		} else if seatType == 2 {
-			v.Table = "KC"
-			name = v.Lastname + "," + v.Firstname
-			kitchenCrew = append(kitchenCrew, name)
 
-		} else {
-			v.Table = strconv.Itoa(num)
-			name = v.Lastname + "," + v.Firstname
-			nameHold = name + "," + v.Table
-			addOn = append(addOn, nameHold)
+		valueStr := strconv.Itoa(value)
+
+		switch {
+		case value > 280:
+			valueStr = valueStr + " kc"
+		default:
+
+			counter++
+			if counter > 7 {
+				tableNum++
+				counter = 0
+				fmt.Println("counted to ", tableNum)
+			}
+
+			valueStr = strconv.Itoa(tableNum)
+
 		}
-		fmt.Fprintln(f, name+","+v.Table)
-		tables = append(tables, addOn)
 
-		//fmt.Println(tables, waiter, kitchenCrew)
+		name = v.Lastname + "," + v.Firstname + "," + valueStr + "," + strconv.Itoa(counter)
+
+		//fmt.Println("value", name)
+
+		fmt.Fprintln(f, name)
+
+		value++
+
 		if err != nil {
 			fmt.Println(err)
 			return ""
 		}
 	}
-	fmt.Println("here")
 
 	err = f.Close()
 	if err != nil {
@@ -168,7 +163,6 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 func initFile(title string) {
 	f, err := os.Create(title)
 	if err != nil {
-		//fmt.Println(err)
 		f.Close()
 		return
 	}
@@ -180,13 +174,10 @@ func initFile(title string) {
 // title is the string of the txt file
 func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	var originalGroup = slicedPeople
-	var waiter []string
 
 	// choose the first 10 to be kitchen crew:
 	var nextGroup = chooseNext(slicedPeople, 10)
-	kcReturn := makeFile(nextGroup, 10, 2, title)
-	waiter = append(waiter, kcReturn)
-	fmt.Println("return:", waiter)
+	makeFile(nextGroup, 10, 2, title)
 
 	// remove the first 10 from the main list:
 	removeIndex(10, slicedPeople)
@@ -200,8 +191,8 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 
 	// append all tables to CSV file:
 	for i := 1; i < 32; i++ {
-		var table = chooseNext(slicedPeople, 8)
-		makeFile(table, i, 1, title)
+		var seated = chooseNext(slicedPeople, 8)
+		makeFile(seated, i, 1, title)
 		removeIndex(8, slicedPeople)
 	}
 	fmt.Println("all completed succesfully!")
@@ -209,80 +200,46 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	return originalGroup
 }
 
-/*
-// Function to read the previous file, create the second, and do the iteration thingamajig.
-func runBody(firstFile string, secondFile string, iteration int) {
-	var people []Person
-	var csvFile, _ = os.Open(firstFile)
-	csvFile.Close()
-	people = nil
-	csvFile, _ = os.Open(firstFile)
-	var reader = csv.NewReader(bufio.NewReader(csvFile))
-	for {
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-		} else if error != nil {
-			log.Fatal(error)
-		}
+// PLACEMENT STUFF:
 
-		people = append(people, Person{
-			Placement: line[0],
-			Firstname: line[1],
-			Lastname:  line[2],
-		})
+// 9 people per table, 9 is waiter
+// 1 -> up a table to 2 (+10)
+// 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
+// 3 -> up 3 tables to 4 (+28)
+// 4 -> up 4 tables to 5 (+37)
+// 5 -> up 5 tables to 6 (+46)
+// 6 -> up 6 tables to 7 (+55)
+// 7 -> up 7 tables to 8 (+64)
+// 8 -> up 8 tables to 9 (W) (+73)
+// 9 (W) -> up 9 tables to 1 (+74)
+
+func newPlacement(location int) {
+	// Calculate the new placement:
+	switch {
+	case location%4 == 0 && location%8 != 0:
+		fmt.Println("at position 4")
+	case location%2 == 0 && location%4 != 0 && location%2 != 0:
+		fmt.Println("at position 8")
+	case location%3 == 0 && location%6 != 0:
+		fmt.Println("at position 3")
+	case location%6 == 0:
+		fmt.Println("at position 6")
+	case location%4 != 0 && location%6 != 0 && location%2 == 0:
+		fmt.Println("at position 2")
+	case location%5 == 0:
+		fmt.Println("at position 5")
+	default:
+		fmt.Println("number 1")
 	}
-	var peopleSlice = people
-	var slicedPeople = Shuffle(peopleSlice)
-	initFile(secondFile)
-	iterateAndChoose(slicedPeople, secondFile, iteration)
-
-	csvFile, _ = os.Open(secondFile)
-	csvFile.Close()
-	people = nil
-	csvFile, _ = os.Open(secondFile)
-	reader = csv.NewReader(bufio.NewReader(csvFile))
-	for {
-		line, error := reader.Read()
-		if error == io.EOF {
-			break
-		} else if error != nil {
-			log.Fatal(error)
-		}
-
-		people = append(people, Person{
-			Placement: line[0],
-			Firstname: line[1],
-			Lastname:  line[2],
-		})
-	}
-	peopleSlice = people
-
-	cleanUp(peopleSlice)
-
-	fmt.Println(peopleSlice)
-
 }
-*/
-/*
-// Function to "clean-up" the final file. Places all in numberic/alphabetical order. Will add in an ability to re-pars the files to combine them all together.
-func cleanUp(slice []Person) []Person {
-	initFile("final.csv")
-	var secSlice []Person
-	d := slice
-	fmt.Println(d)
 
-	for i, v := range d {
-		var (
-			toGo, kind = strconv.Atoi(v.Placement)
-		)
-		if kind != nil {
-			fmt.Println(kind)
-		}
-		fmt.Println(v)
-		secSlice = append(rearrange(int(i), toGo, d))
-	}
-	fmt.Println(secSlice)
-	return secSlice
+func rearrange(remove int, place int, input []Person) []Person {
+	slice := input
+	val := slice[remove]
+	slice = append(slice[:remove], slice[remove+1:]...)
+	newSlice := make([]Person, place+1)
+	copy(newSlice, slice[:place])
+	newSlice[place] = val
+	slice = append(newSlice, slice[place:]...)
+	return slice
 }
-*/
