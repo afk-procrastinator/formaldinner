@@ -43,6 +43,8 @@ var tableNum int = 1
 
 var counter = -1
 
+var kitchenCrewLoc = 1
+
 // Main function:
 func main() {
 
@@ -126,7 +128,11 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 		// If you're above position (value) 280, you're KC
 		switch {
 		case value > 280:
-			valueStr = "Kitchen Crew"
+			valueStr = "Kitchen Crew number " + strconv.Itoa(kitchenCrewLoc)
+			kitchenCrewLoc++
+		case value >= 249 && value <= 280:
+			var waiterTable = value - 248
+			valueStr = "Waiter at table " + strconv.Itoa(waiterTable)
 		default:
 			// Counter cycles from 0 to 7, picking out 8 people per table
 			counter++
@@ -140,7 +146,7 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 		}
 
 		// Full name to print to the csv file. Will be changed for final iterations, currently prints basically everything for clarity's sake.
-		name = v.Lastname + "," + v.Firstname + "," + valueStr + "; Position " + strconv.Itoa(counter)
+		name = v.Lastname + "," + v.Firstname + "," + valueStr
 
 		fmt.Fprintln(f, name)
 
@@ -200,20 +206,6 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 
 	return originalGroup
 }
-
-// PLACEMENT STUFF:
-
-// 9 people per table, 9 is waiter
-// 1 -> up a table to 2 (+10)
-// 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
-// 3 -> up 3 tables to 4 (+28)
-// 4 -> up 4 tables to 5 (+37)
-// 5 -> up 5 tables to 6 (+46)
-// 6 -> up 6 tables to 7 (+55)
-// 7 -> up 7 tables to 8 (+64)
-// 8 -> up 8 tables to 9 (W) (+73)
-// 9 (W) -> up 9 tables to 1 (+74)
-
 func newPlacement(location int) {
 	// Calculate the new placement:
 	switch {
@@ -242,4 +234,82 @@ func rearrange(remove int, place int, input []Person) []Person {
 	newSlice[place] = val
 	slice = append(newSlice, slice[place:]...)
 	return slice
+}
+
+
+// Calculates the following location. Table is
+func nextLocation(table int, place int, name string, location int, waiterTable int, kitchenLoc int) string {
+	var newTable int
+	var newPlace int
+	var stringToPrint string
+
+	switch place {
+	case 0: // 1 -> up a table to 2 (+10)
+
+		newTable = table + 1
+		newPlace = place + 1
+		location = location + 10
+
+
+	case 1: // 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
+
+		newTable = table + 2
+		newPlace = place + 1
+		location = location + 19
+
+
+	case 2: // 3 -> up 3 tables to 4 (+28)
+
+		newTable = table + 3
+		newPlace = place + 1
+		location = location + 28
+
+
+	case 3: // 4 -> up 4 tables to 5 (+37)
+
+		newTable = table + 4
+		newPlace = place + 1
+		location = location + 37
+
+
+	case 4: // 5 -> up 5 tables to 6 (+46)
+
+		newTable = table + 5
+		newPlace = place + 1
+		location = location + 46
+
+
+	case 5: // 6 -> up 6 tables to 7 (+55)
+
+		newTable = table + 6
+		newPlace = place + 1
+		location = location + 55
+
+
+	case 6: // 7 -> up 7 tables to 8 (+64)
+
+		newTable = table + 7
+		newPlace = place + 1
+		location = location + 64
+
+
+	case 7: // 8 -> up 8 tables to 9 (W) (+73)
+
+		if location >= 249 && location <= 280 { // Waiters -> get placed into position 1 based on their location
+			newTable = waiterTable + 1
+			newPlace = 1
+			location = (newTable * 8) - 7
+		} else if location > 280 { // KC
+			newTable = kitchenLoc
+			newPlace = 2
+			location = 
+		} else {
+			newTable = table + 8
+			newPlace = place + 1
+		}
+	}
+
+	if 
+
+
 }
