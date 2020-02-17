@@ -264,5 +264,65 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 		}
 	}
 	newString := "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
+	nextString := nextLocationAgain(newTable, newPlace, location, waiterTable, kitchenLoc)
+	return newString + "," + nextString
+}
+
+func nextLocationAgain(table int, place int, location int, waiterTable int, kitchenLoc int) string {
+	var newTable int
+	var newPlace int
+	//var stringToPrint string
+
+	switch place {
+	case 0: // 1 -> up a table to 2 (+10)
+		newTable = table + 1
+		newPlace = place + 1
+		location = location + 10
+
+	case 1: // 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
+		newTable = table + 2
+		newPlace = place + 1
+		location = location + 19
+
+	case 2: // 3 -> up 3 tables to 4 (+28)
+		newTable = table + 3
+		newPlace = place + 1
+		location = location + 28
+
+	case 3: // 4 -> up 4 tables to 5 (+37)
+		newTable = table + 4
+		newPlace = place + 1
+		location = location + 37
+
+	case 4: // 5 -> up 5 tables to 6 (+46)
+		newTable = table + 5
+		newPlace = place + 1
+		location = location + 46
+
+	case 5: // 6 -> up 6 tables to 7 (+55)
+		newTable = table + 6
+		newPlace = place + 1
+		location = location + 55
+
+	case 6: // 7 -> up 7 tables to 8 (+64)
+		newTable = table + 7
+		newPlace = place + 1
+		location = location + 64
+
+	case 7: // 8 -> up 8 tables to 9 (W) (+73)
+
+		if location >= 249 && location <= 280 { // Waiters -> get placed into position 1 based on their location
+			newTable = waiterTable + 1
+			newPlace = 1
+			location = (newTable * 8) - 7
+		} else if location > 280 { // KC
+			newTable = kitchenLoc
+			newPlace = 2
+		} else {
+			newTable = table + 8
+			newPlace = place + 1
+		}
+	}
+	newString := "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
 	return newString
 }
