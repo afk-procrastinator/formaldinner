@@ -219,6 +219,7 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 		case 0: // 1 -> up a table to 2 (+10)
 			newTable = table + 1
 			newPlace = place + 1
+<<<<<<< HEAD
 			location = location + 10
 
 		case 1: // 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
@@ -272,5 +273,10 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 
 		newString = newString + "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
 	}
+=======
+		}
+	}
+	newString := "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
+>>>>>>> parent of 9d39b2f... Progress- have two iterations, not all clean though.
 	return newString
 }
