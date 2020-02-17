@@ -146,7 +146,10 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 		}
 
 		// Full name to print to the csv file. Will be changed for final iterations, currently prints basically everything for clarity's sake.
-		name = v.Lastname + "," + v.Firstname + "," + valueStr
+
+		nextLoc := nextLocation(tableNum, counter, value, 5, 5)
+
+		name = v.Lastname + "," + v.Firstname + "," + valueStr + "," + nextLoc
 
 		fmt.Fprintln(f, name)
 
@@ -175,10 +178,7 @@ func initFile(title string) {
 	}
 }
 
-// Function that iterates through the slice and chooses people to go to certain positions based on index.
-// Also calls in the file creation function.
-// slicedPeople is the slice to iterate through
-// title is the string of the txt file
+// Function that iterates through the slice and chooses people to go to certain positions based on index. Also calls in the file creation function.
 func iterateAndChoose(slicedPeople []Person, title string) []Person {
 	var originalGroup = slicedPeople
 
@@ -206,92 +206,48 @@ func iterateAndChoose(slicedPeople []Person, title string) []Person {
 
 	return originalGroup
 }
-func newPlacement(location int) {
-	// Calculate the new placement:
-	switch {
-	case location%4 == 0 && location%8 != 0:
-		fmt.Println("at position 4")
-	case location%2 == 0 && location%4 != 0 && location%2 != 0:
-		fmt.Println("at position 8")
-	case location%3 == 0 && location%6 != 0:
-		fmt.Println("at position 3")
-	case location%6 == 0:
-		fmt.Println("at position 6")
-	case location%4 != 0 && location%6 != 0 && location%2 == 0:
-		fmt.Println("at position 2")
-	case location%5 == 0:
-		fmt.Println("at position 5")
-	default:
-		fmt.Println("number 1")
-	}
-}
-func rearrange(remove int, place int, input []Person) []Person {
-	slice := input
-	val := slice[remove]
-	slice = append(slice[:remove], slice[remove+1:]...)
-	newSlice := make([]Person, place+1)
-	copy(newSlice, slice[:place])
-	newSlice[place] = val
-	slice = append(newSlice, slice[place:]...)
-	return slice
-}
-
 
 // Calculates the following location. Table is
-func nextLocation(table int, place int, name string, location int, waiterTable int, kitchenLoc int) string {
+func nextLocation(table int, place int, location int, waiterTable int, kitchenLoc int) string {
 	var newTable int
 	var newPlace int
-	var stringToPrint string
+	//var stringToPrint string
 
 	switch place {
 	case 0: // 1 -> up a table to 2 (+10)
-
 		newTable = table + 1
 		newPlace = place + 1
 		location = location + 10
 
-
 	case 1: // 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
-
 		newTable = table + 2
 		newPlace = place + 1
 		location = location + 19
 
-
 	case 2: // 3 -> up 3 tables to 4 (+28)
-
 		newTable = table + 3
 		newPlace = place + 1
 		location = location + 28
 
-
 	case 3: // 4 -> up 4 tables to 5 (+37)
-
 		newTable = table + 4
 		newPlace = place + 1
 		location = location + 37
 
-
 	case 4: // 5 -> up 5 tables to 6 (+46)
-
 		newTable = table + 5
 		newPlace = place + 1
 		location = location + 46
 
-
 	case 5: // 6 -> up 6 tables to 7 (+55)
-
 		newTable = table + 6
 		newPlace = place + 1
 		location = location + 55
 
-
 	case 6: // 7 -> up 7 tables to 8 (+64)
-
 		newTable = table + 7
 		newPlace = place + 1
 		location = location + 64
-
 
 	case 7: // 8 -> up 8 tables to 9 (W) (+73)
 
@@ -302,14 +258,11 @@ func nextLocation(table int, place int, name string, location int, waiterTable i
 		} else if location > 280 { // KC
 			newTable = kitchenLoc
 			newPlace = 2
-			location = 
 		} else {
 			newTable = table + 8
 			newPlace = place + 1
 		}
 	}
-
-	if 
-
-
+	newString := "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
+	return newString
 }
