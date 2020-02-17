@@ -215,7 +215,6 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 	//var stringToPrint string
 
 	for i := 0; i < 2; i++ {
-		fmt.Println(i)
 		switch place {
 		case 0: // 1 -> up a table to 2 (+10)
 			newTable = table + 1
