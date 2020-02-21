@@ -36,14 +36,11 @@ var kitchen []Person
 
 // 8 people per, 31 total, 249 in all:
 var table [][]Person
-
 var value int = 1
-
 var tableNum int = 1
-
 var counter = -1
-
 var kitchenCrewLoc = 1
+var kitchenCrewCount = 10
 
 // Main function:
 func main() {
@@ -128,11 +125,11 @@ func makeFile(slice []Person, num int, seatType int, title string) string {
 		// If you're above position (value) 280, you're KC
 		switch {
 		case value > 280:
-			valueStr = "Kitchen Crew number " + strconv.Itoa(kitchenCrewLoc)
+			valueStr = strconv.Itoa(kitchenCrewLoc)
 			kitchenCrewLoc++
 		case value >= 249 && value <= 280:
 			var waiterTable = value - 248
-			valueStr = "Waiter at table " + strconv.Itoa(waiterTable)
+			valueStr = strconv.Itoa(waiterTable)
 		default:
 			// Counter cycles from 0 to 7, picking out 8 people per table
 			counter++
@@ -212,20 +209,25 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 	var newTable int
 	var newPlace int
 	var newString string
-	//var stringToPrint string
 
 	for i := 0; i < 2; i++ {
 		switch place {
 		case 0: // 1 -> up a table to 2 (+10)
 			newTable = table + 1
 			newPlace = place + 1
-<<<<<<< HEAD
 			location = location + 10
 
 		case 1: // 2 -> up 2 tables to 3 (+19) [first 10 are selected for KC, placed back in after]
-			newTable = table + 2
-			newPlace = place + 1
-			location = location + 19
+
+			if location < 90 {
+				newTable = 100
+				newPlace = 100
+			} else {
+
+				newTable = table + 2
+				newPlace = place + 1
+				location = location + 19
+			}
 
 		case 2: // 3 -> up 3 tables to 4 (+28)
 			newTable = table + 3
@@ -253,7 +255,6 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 			location = location + 64
 
 		case 7: // 8 -> up 8 tables to 9 (W) (+73)
-
 			if location >= 249 && location <= 280 { // Waiters -> get placed into position 1 based on their location
 				newTable = waiterTable + 1
 				newPlace = 1
@@ -267,16 +268,17 @@ func nextLocation(table int, place int, location int, waiterTable int, kitchenLo
 			}
 		}
 
+		// Formatting cleanup and preparing for the next iteration:
 		if i == 1 {
 			newString = newString + ","
 		}
 
-		newString = newString + "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
+		table = newTable
+		place = newPlace
+		newString = newString + strconv.Itoa(newTable)
+
 	}
-=======
-		}
-	}
-	newString := "New table is: " + strconv.Itoa(newTable) + " and new position is: " + strconv.Itoa(newPlace)
->>>>>>> parent of 9d39b2f... Progress- have two iterations, not all clean though.
+
 	return newString
+
 }
